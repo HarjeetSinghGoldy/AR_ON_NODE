@@ -1,0 +1,91 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 18.08.2017 14:13:07
+
+newmtl wire_027177148
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.1059 0.6941 0.5804
+	Kd 0.1059 0.6941 0.5804
+	Ks 0.3500 0.3500 0.3500
+	map_Kd cake_texture_by_xnickixstockx bump 1.jpg
+
+newmtl wire_008110135
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 1.0 1.0 1.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+	map_Kd cake_texture_by_xnickixstockx bump 1.jpg
+
+
+newmtl wire_135006006
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.0804 0.0941 0.0059
+	Kd 0.0804 0.0941 0.0059
+	Ks 0.0500 0.0500 0.0500
+	map_Ka cake_texture_by_xnickixstockx bump 1.jpg
+	map_Kd  cake_texture_by_xnickixstockx.jpg
+
+newmtl wire_148177027
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.0804 0.0941 0.0059
+	Kd 0.0804 0.0941 0.0059
+	Ks 0.0500 0.0500 0.0500
+	map_Ka cake_texture_by_xnickixstockx bump 1.jpg
+	map_Kd  cake_texture_by_xnickixstockx.jpg
+
+
+newmtl wire_008008136
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ns 92.156863
+	Ka 1.000000 1.000000 1.000000
+	Kd 0.800000 0.800000 0.800000
+	Ks 0.050000 0.050000 0.050000
+	Ke 0.000000 0.000000 0.000000
+	Ni 1.000000
+	d 1.000000
+	map_Ka cake_texture_by_xnickixstockx bump 1.jpg
+	map_Kd cake_texture_by_xnickixstockx bump 1.jpg
+
+
+newmtl wire_006135058
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 1.0235 1.5294 1.2275
+	Kd 1.0235 1.5294 1.2275
+	Ks 1.3500 1.3500 1.3500
+	map_Ka red.jpg
+	map_Kd red.jpg
+
+
+newmtl wire_225088199
+	Ns 92.156863
+	Ka 1.000000 1.000000 1.000000
+	Kd 0.800000 0.800000 0.800000
+	Ks 0.050000 0.050000 0.050000
+	Ke 0.000000 0.000000 0.000000
+	Ni 1.000000
+	d 1.000000
+	illum 2
+	map_Ka chair_albedo.jpg
+	map_Kd chair_albedo.jpg
