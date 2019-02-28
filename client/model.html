@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<title>Hello, world!</title>
@@ -18,470 +19,378 @@
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
 
-<!--
+	<!--
   Example created by Lee Stemkoski: https://github.com/stemkoski
   Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
 -->
 
-<script>
+	<script>
+		var scene, camera, renderer, clock, deltaTime, totalTime;
 
-var scene, camera, renderer, clock, deltaTime, totalTime;
+		var arToolkitSource, arToolkitContext;
 
-var arToolkitSource, arToolkitContext;
+		var markerRoot1;
 
-var markerRoot1;
+		var mesh1;
 
-var mesh1;
+		initialize();
+		animate();
 
-initialize();
-animate();
+		function initialize() {
+			scene = new THREE.Scene();
 
-function initialize()
-{
-	scene = new THREE.Scene();
+			let ambientLight = new THREE.AmbientLight(0xcccccc, 1.0);
+			scene.add(ambientLight);
 
-	let ambientLight = new THREE.AmbientLight( 0xcccccc, 1.0 );
-	scene.add( ambientLight );
+			camera = new THREE.Camera();
+			scene.add(camera);
 
-	camera = new THREE.Camera();
-	scene.add(camera);
+			renderer = new THREE.WebGLRenderer({
+				antialias: true,
+				alpha: true
+			});
+			renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+			renderer.setSize(640, 480);
+			renderer.domElement.style.position = 'absolute'
+			renderer.domElement.style.top = '0px'
+			renderer.domElement.style.left = '0px'
+			document.body.appendChild(renderer.domElement);
 
-	renderer = new THREE.WebGLRenderer({
-		antialias : true,
-		alpha: true
-	});
-	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( 640, 480 );
-	renderer.domElement.style.position = 'absolute'
-	renderer.domElement.style.top = '0px'
-	renderer.domElement.style.left = '0px'
-	document.body.appendChild( renderer.domElement );
+			clock = new THREE.Clock();
+			deltaTime = 0;
+			totalTime = 0;
 
-	clock = new THREE.Clock();
-	deltaTime = 0;
-	totalTime = 0;
+			////////////////////////////////////////////////////////////
+			// setup arToolkitSource
+			////////////////////////////////////////////////////////////
 
-	////////////////////////////////////////////////////////////
-	// setup arToolkitSource
-	////////////////////////////////////////////////////////////
+			arToolkitSource = new THREEx.ArToolkitSource({
+				sourceType: 'webcam',
+			});
 
-	arToolkitSource = new THREEx.ArToolkitSource({
-		sourceType : 'webcam',
-	});
-
-	function onResize()
-	{
-		arToolkitSource.onResize()
-		arToolkitSource.copySizeTo(renderer.domElement)
-		if ( arToolkitContext.arController !== null )
-		{
-			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)
-		}
-	}
-
-	arToolkitSource.init(function onReady(){
-		onResize()
-	});
-
-	// handle resize event
-	window.addEventListener('resize', function(){
-		onResize()
-	});
-
-	////////////////////////////////////////////////////////////
-	// setup arToolkitContext
-	////////////////////////////////////////////////////////////
-
-	// create atToolkitContext
-	arToolkitContext = new THREEx.ArToolkitContext({
-		cameraParametersUrl: 'data/camera_para.dat',
-		detectionMode: 'mono'
-	});
-
-	// copy projection matrix to camera when initialization complete
-	arToolkitContext.init( function onCompleted(){
-		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
-	});
-
-	////////////////////////////////////////////////////////////
-	// setup markerRoots
-	////////////////////////////////////////////////////////////
-
-	// build markerControls
-	markerRoot1 = new THREE.Group();
-	scene.add(markerRoot1);
-	let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
-		type: 'pattern', patternUrl: "data/hiro.patt",
-	})
-
-	let geometry1 = new THREE.PlaneBufferGeometry(1,1, 4,4);
-	let loader = new THREE.TextureLoader();
-	// let texture = loader.load( 'images/earth.jpg', render );
-	let material1 = new THREE.MeshBasicMaterial( { color: 0x0000ff, opacity: 0.5 } );
-	mesh1 = new THREE.Mesh( geometry1, material1 );
-	mesh1.rotation.x = -Math.PI/2;
-	markerRoot1.add( mesh1 );
-
-	function onProgress(xhr) { console.log( (xhr.loaded / xhr.total * 100) + '% loaded' ); }
-	function onError(xhr) { console.log( 'An error happened' ); }
-
-	// new THREE.MTLLoader()
-	// 	.setPath( 'female02/' )
-	// 	.load( 'female02.mtl', function ( materials ) {
-	// 		materials.preload();
-	// 		new THREE.OBJLoader()
-	// 			.setMaterials( materials )
-	// 			.setPath( 'female02/' )
-	// 			.load( 'female02.obj', function ( group ) {
-	// 				// console.log("@@@@@group.children",group.position.x=1);
-	//
-	// 				// mesh0.material.side = THREE.DoubleSide;
-	// 				// let mesh0,mesh1,mesh2,mesh3,mesh4,mesh5,mesh6,mesh7,mesh8,mesh9,mesh10,mesh11,mesh12,mesh13,mesh14;
-	// 				//
-	// 				// mesh0 = group.children[0];
-	// 				//
-	// 				// mesh0.scale.set(0.01,0.01,0.01);
-	// 				//
-	// 				// mesh1 = group.children[1];
-	// 				// mesh1.scale.set(0.01,0.01,0.01);
-	// 				//
-	// 				// mesh2 = group.children[2];
-	// 				// mesh2.scale.set(0.01,0.01,0.01);
-	// 				//
-	// 				// mesh3 = group.children[3];
-	// 				// mesh3.scale.set(0.01,0.01,0.01);
-	// 				// mesh4 = group.children[4];
-	// 				// mesh4.scale.set(0.01,0.01,0.01);
-	// 				// mesh5 = group.children[5];
-	// 				// mesh5.scale.set(0.01,0.01,0.01);
-	// 				// mesh6 = group.children[6];
-	// 				// mesh6.scale.set(0.01,0.01,0.01);
-	// 				// mesh7 = group.children[7];
-	// 				// mesh7.scale.set(0.01,0.01,0.01);
-	// 				// mesh8 = group.children[8];
-	// 				// mesh8.scale.set(0.01,0.01,0.01);
-	// 				// mesh9 = group.children[9];
-	// 				// mesh9.scale.set(0.01,0.01,0.01);
-	// 				// mesh10 = group.children[10];
-	// 				// mesh10.scale.set(0.01,0.01,0.01);
-	// 				// mesh11 = group.children[11];
-	// 				// mesh11.scale.set(0.01,0.01,0.01);
-	// 				// mesh12 = group.children[12];
-	// 				// mesh12.scale.set(0.01,0.01,0.01);
-	// 				// mesh13 = group.children[13];
-	// 				// mesh13.scale.set(0.01,0.01,0.01);
-	// 				// mesh14 = group.children[14];
-	// 				// mesh14.scale.set(0.01,0.01,0.01);
-	// 				//
-	// 				// mesh0.position.x = -0.25
-	// 				// mesh1.position.x = -0.25
-	// 				// mesh2.position.x = -0.25
-	// 				// mesh3.position.x = -0.25
-	// 				// mesh4.position.x = -0.25
-	// 				// mesh5.position.x = -0.25
-	// 				// mesh6.position.x = -0.25
-	// 				// mesh7.position.x = -0.25
-	// 				// mesh8.position.x = -0.25
-	// 				// mesh9.position.x = -0.25
-	// 				// mesh10.position.x = -0.25
-	// 				// mesh11.position.x = -0.25
-	// 				// mesh12.position.x = -0.25
-	// 				// mesh13.position.x = -0.25
-	// 				// mesh14.position.x = -0.25
-	//
-	// 				// group.children.forEach(function(child){
-	// 				// 	 child.scale.set(0.01,0.01,0.01);
-	// 				// 	 child.position.x = -0.25;
-	// 				// 	 // markerRoot1.add(child)
-	// 				// })
-	//
-	//
-	// 				for(let i=group.children.length-1;i>=0;i--){
-	// 					let child=group.children[i]
-	// 					child.scale.set(0.01,0.01,0.01);
-	// 					child.position.x = -0.25;
-	// 					markerRoot1.add(child)
-	//
-	//
-	// 				}
-	//
-	// 									console.log("group.children*************",group.children)
-	//
-	// 								console.log("markerRoot1*************",markerRoot1)
-	//
-	//
-	// 				//
-	// 				// for(let i=0;i<2;i++){
-	// 				// 	let child=group.children[i]
-	// 				// 	markerRoot1.add(child)
-	// 				//
-	// 				// }
-	// 				// markerRoot1.add(mesh0);
-	// 				// markerRoot1.add(mesh1);
-	// 				// markerRoot1.add(mesh2);
-	// 				// markerRoot1.add(mesh3);
-	// 				// markerRoot1.add(mesh4);
-	// 				// markerRoot1.add(mesh5);
-	// 				// markerRoot1.add(mesh6);
-	// 				// markerRoot1.add(mesh7);
-	// 				// markerRoot1.add(mesh8);
-	// 				// markerRoot1.add(mesh9);
-	// 				// markerRoot1.add(mesh10);
-	// 				// markerRoot1.add(mesh11);
-	// 				// markerRoot1.add(mesh12);
-	// 				// markerRoot1.add(mesh13);
-	// 				// markerRoot1.add(mesh14);
-	// 				// markerRoot1.add(group.children[0]);
-	// 				// markerRoot1.add(group.children[1]);
-	// 				// markerRoot1.add(group.children[2]);
-	// 				// markerRoot1.add(group.children[3]);
-	// 				// markerRoot1.add(group.children[4]);
-	// 				// markerRoot1.add(group.children[5]);
-	// 				// markerRoot1.add(group.children[6]);
-	// 				// markerRoot1.add(group.children[7]);
-	// 				// markerRoot1.add(group.children[8]);
-	// 				// markerRoot1.add(group.children[9]);
-	// 				// markerRoot1.add(group.children[10]);
-	// 				// markerRoot1.add(group.children[11]);
-	// 				// markerRoot1.add(group.children[12]);
-	// 				// markerRoot1.add(group.children[13]);
-	// 				// markerRoot1.add(group.children[14]);
-	//
-	// 			}, onProgress, onError )
-	// 	});
-// 	new THREE.MTLLoader()
-// 		.setPath( 'male02/' )
-// 		.load( 'male02.mtl', function ( materials ) {
-// 			materials.preload();
-// 			new THREE.OBJLoader()
-// 				.setMaterials( materials )
-// 				.setPath( 'male02/' )
-// 				.load( 'male02.obj', function ( group ) {
-// 					console.log("@@@@@group.children",group.children);
-// 					// mesh0.material.side = THREE.DoubleSide;
-// 					// mesh0.position.y = -0.25;
-// 					mesh0 = group.children[0];
-// 					mesh0.scale.set(0.01,0.01,0.01);
-//
-// 					mesh1 = group.children[1];
-// 					mesh1.scale.set(0.02,0.02,0.02);
-// 					mesh1.material.side = THREE.DoubleSide;
-//
-// mesh1.position.z = 1;
-// mesh1.position.y = -2;
-// 					mesh2 = group.children[2];
-// 					mesh2.scale.set(0.01,0.01,0.01);
-//
-// 					mesh3 = group.children[3];
-// 					mesh3.scale.set(0.01,0.01,0.01);
-// 					mesh4 = group.children[4];
-// 					mesh4.scale.set(0.01,0.01,0.01);
-// 					mesh5 = group.children[5];
-// 					mesh5.scale.set(0.01,0.01,0.01);
-// 					mesh6 = group.children[6];
-// 					mesh6.scale.set(0.01,0.01,0.01);
-// 					mesh7 = group.children[7];
-// 					mesh7.scale.set(0.01,0.01,0.01);
-// 					mesh8 = group.children[8];
-// 					mesh8.scale.set(0.01,0.01,0.01);
-// 					mesh9 = group.children[9];
-// 					mesh9.scale.set(0.01,0.01,0.01);
-// 					mesh10 = group.children[10];
-// 					mesh10.scale.set(0.01,0.01,0.01);
-// 					mesh11 = group.children[11];
-// 					mesh11.scale.set(0.01,0.01,0.01);
-// 					mesh12 = group.children[12];
-// 					mesh12.scale.set(0.01,0.01,0.01);
-// 					mesh13 = group.children[13];
-// 					mesh13.scale.set(0.01,0.01,0.01);
-//
-//
-// 					mesh0.position.x = 0.35
-// 					// mesh1.position.x = 0.35
-// 					mesh2.position.x = 0.35
-// 					mesh3.position.x = 0.35
-// 					mesh4.position.x = 0.35
-// 					mesh5.position.x = 0.35
-// 					mesh6.position.x = 0.35
-// 					mesh7.position.x = 0.35
-// 					mesh8.position.x = 0.35
-// 					mesh9.position.x = 0.35
-// 					mesh10.position.x = 0.35
-// 					mesh11.position.x = 0.35
-// 					mesh12.position.x = 0.35
-// 					mesh13.position.x = 0.35
-//
-// 					// markerRoot1.add(mesh0);
-// 					markerRoot1.add(mesh1);
-// 					// markerRoot1.add(mesh2);
-// 					// markerRoot1.add(mesh3);
-// 					// markerRoot1.add(mesh4);
-// 					// markerRoot1.add(mesh5);
-// 					// markerRoot1.add(mesh6);
-// 					// markerRoot1.add(mesh7);
-// 					// markerRoot1.add(mesh8);
-// 					// markerRoot1.add(mesh9);
-// 					// markerRoot1.add(mesh10);
-// 					// markerRoot1.add(mesh11);
-// 					// markerRoot1.add(mesh12);
-// 					// markerRoot1.add(mesh13);
-//
-// 				}, onProgress, onError )
-// 		});
-
-
-new THREE.MTLLoader()
-	.setPath( 'cake/' )
-	.load( 'Chocolate Cake.mtl', function ( materials ) {
-		materials.preload();
-		new THREE.OBJLoader()
-			.setMaterials( materials )
-			.setPath( 'cake/' )
-			.load( 'Chocolate Cake.obj', function ( group ) {
-				// console.log("@@@@@group.children",group.position.x=1);
-
-				// mesh0.material.side = THREE.DoubleSide;
-				// let mesh0,mesh1,mesh2,mesh3,mesh4,mesh5,mesh6,mesh7,mesh8,mesh9,mesh10,mesh11,mesh12,mesh13,mesh14;
-				//
-				// mesh0 = group.children[0];
-				//
-				// mesh0.scale.set(0.01,0.01,0.01);
-				//
-				// mesh1 = group.children[1];
-				// mesh1.scale.set(0.01,0.01,0.01);
-				//
-				// mesh2 = group.children[2];
-				// mesh2.scale.set(0.01,0.01,0.01);
-				//
-				// mesh3 = group.children[3];
-				// mesh3.scale.set(0.01,0.01,0.01);
-				// mesh4 = group.children[4];
-				// mesh4.scale.set(0.01,0.01,0.01);
-				// mesh5 = group.children[5];
-				// mesh5.scale.set(0.01,0.01,0.01);
-				// mesh6 = group.children[6];
-				// mesh6.scale.set(0.01,0.01,0.01);
-				// mesh7 = group.children[7];
-				// mesh7.scale.set(0.01,0.01,0.01);
-				// mesh8 = group.children[8];
-				// mesh8.scale.set(0.01,0.01,0.01);
-				// mesh9 = group.children[9];
-				// mesh9.scale.set(0.01,0.01,0.01);
-				// mesh10 = group.children[10];
-				// mesh10.scale.set(0.01,0.01,0.01);
-				// mesh11 = group.children[11];
-				// mesh11.scale.set(0.01,0.01,0.01);
-				// mesh12 = group.children[12];
-				// mesh12.scale.set(0.01,0.01,0.01);
-				// mesh13 = group.children[13];
-				// mesh13.scale.set(0.01,0.01,0.01);
-				// mesh14 = group.children[14];
-				// mesh14.scale.set(0.01,0.01,0.01);
-				//
-				// mesh0.position.x = -0.25
-				// mesh1.position.x = -0.25
-				// mesh2.position.x = -0.25
-				// mesh3.position.x = -0.25
-				// mesh4.position.x = -0.25
-				// mesh5.position.x = -0.25
-				// mesh6.position.x = -0.25
-				// mesh7.position.x = -0.25
-				// mesh8.position.x = -0.25
-				// mesh9.position.x = -0.25
-				// mesh10.position.x = -0.25
-				// mesh11.position.x = -0.25
-				// mesh12.position.x = -0.25
-				// mesh13.position.x = -0.25
-				// mesh14.position.x = -0.25
-
-				// group.children.forEach(function(child){
-				// 	 child.scale.set(0.01,0.01,0.01);
-				// 	 child.position.x = -0.25;
-				// 	 // markerRoot1.add(child)
-				// })
-
-
-				for(let i=group.children.length-1;i>=0;i--){
-					let child=group.children[i]
-					child.scale.set(0.1,0.1,0.1);
-					child.position.x = -0.25;
-					markerRoot1.add(child)
-
-
+			function onResize() {
+				arToolkitSource.onResize()
+				arToolkitSource.copySizeTo(renderer.domElement)
+				if (arToolkitContext.arController !== null) {
+					arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)
 				}
+			}
 
-									console.log("group.children*************",group.children)
+			arToolkitSource.init(function onReady() {
+				onResize()
+			});
 
-								console.log("markerRoot1*************",markerRoot1)
+			// handle resize event
+			window.addEventListener('resize', function() {
+				onResize()
+			});
+
+			////////////////////////////////////////////////////////////
+			// setup arToolkitContext
+			////////////////////////////////////////////////////////////
+
+			// create atToolkitContext
+			arToolkitContext = new THREEx.ArToolkitContext({
+				cameraParametersUrl: 'data/camera_para.dat',
+				detectionMode: 'mono'
+			});
+
+			// copy projection matrix to camera when initialization complete
+			arToolkitContext.init(function onCompleted() {
+				camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+			});
+
+			////////////////////////////////////////////////////////////
+			// setup markerRoots
+			////////////////////////////////////////////////////////////
+
+			// build markerControls
+			markerRoot1 = new THREE.Group();
+			scene.add(markerRoot1);
+			let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
+				type: 'pattern',
+				patternUrl: "data/hiro.patt",
+			})
+
+			// let geometry1 = new THREE.PlaneBufferGeometry(1, 1, 4, 4);
+			let geometry1 = new THREE.PlaneBufferGeometry(1, 1, 4, 4);
+			let loader = new THREE.TextureLoader();
+			// let texture = loader.load( 'images/earth.jpg', render );
+			let material1 = new THREE.MeshBasicMaterial({
+				color: 0x0000ff,
+				opacity: 0.3
+			});
+			mesh1 = new THREE.Mesh(geometry1, material1);
+			mesh1.rotation.x = -Math.PI / 2;
+			markerRoot1.add(mesh1);
+
+			function onProgress(xhr) {
+				console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+			}
+
+			function onError(xhr) {
+				console.log('An error happened');
+			}
+
+			// new THREE.MTLLoader()
+			// 	.setPath( 'female02/' )
+			// 	.load( 'female02.mtl', function ( materials ) {
+			// 		materials.preload();
+			// 		new THREE.OBJLoader()
+			// 			.setMaterials( materials )
+			// 			.setPath( 'female02/' )
+			// 			.load( 'female02.obj', function ( group ) {
+			// 				// console.log("@@@@@group.children",group.position.x=1);
+			//
+			// 				// mesh0.material.side = THREE.DoubleSide;
+			// 				// let mesh0,mesh1,mesh2,mesh3,mesh4,mesh5,mesh6,mesh7,mesh8,mesh9,mesh10,mesh11,mesh12,mesh13,mesh14;
+			// 				//
+			// 				// mesh0 = group.children[0];
+			// 				//
+			// 				// mesh0.scale.set(0.01,0.01,0.01);
+			// 				//
+			// 				// mesh1 = group.children[1];
+			// 				// mesh1.scale.set(0.01,0.01,0.01);
+			// 				//
+			// 				// mesh2 = group.children[2];
+			// 				// mesh2.scale.set(0.01,0.01,0.01);
+			// 				//
+			// 				// mesh3 = group.children[3];
+			// 				// mesh3.scale.set(0.01,0.01,0.01);
+			// 				// mesh4 = group.children[4];
+			// 				// mesh4.scale.set(0.01,0.01,0.01);
+			// 				// mesh5 = group.children[5];
+			// 				// mesh5.scale.set(0.01,0.01,0.01);
+			// 				// mesh6 = group.children[6];
+			// 				// mesh6.scale.set(0.01,0.01,0.01);
+			// 				// mesh7 = group.children[7];
+			// 				// mesh7.scale.set(0.01,0.01,0.01);
+			// 				// mesh8 = group.children[8];
+			// 				// mesh8.scale.set(0.01,0.01,0.01);
+			// 				// mesh9 = group.children[9];
+			// 				// mesh9.scale.set(0.01,0.01,0.01);
+			// 				// mesh10 = group.children[10];
+			// 				// mesh10.scale.set(0.01,0.01,0.01);
+			// 				// mesh11 = group.children[11];
+			// 				// mesh11.scale.set(0.01,0.01,0.01);
+			// 				// mesh12 = group.children[12];
+			// 				// mesh12.scale.set(0.01,0.01,0.01);
+			// 				// mesh13 = group.children[13];
+			// 				// mesh13.scale.set(0.01,0.01,0.01);
+			// 				// mesh14 = group.children[14];
+			// 				// mesh14.scale.set(0.01,0.01,0.01);
+			// 				//
+			// 				// mesh0.position.x = -0.25
+			// 				// mesh1.position.x = -0.25
+			// 				// mesh2.position.x = -0.25
+			// 				// mesh3.position.x = -0.25
+			// 				// mesh4.position.x = -0.25
+			// 				// mesh5.position.x = -0.25
+			// 				// mesh6.position.x = -0.25
+			// 				// mesh7.position.x = -0.25
+			// 				// mesh8.position.x = -0.25
+			// 				// mesh9.position.x = -0.25
+			// 				// mesh10.position.x = -0.25
+			// 				// mesh11.position.x = -0.25
+			// 				// mesh12.position.x = -0.25
+			// 				// mesh13.position.x = -0.25
+			// 				// mesh14.position.x = -0.25
+			//
+			// 				// group.children.forEach(function(child){
+			// 				// 	 child.scale.set(0.01,0.01,0.01);
+			// 				// 	 child.position.x = -0.25;
+			// 				// 	 // markerRoot1.add(child)
+			// 				// })
+			//
+			//
+			// 				for(let i=group.children.length-1;i>=0;i--){
+			// 					let child=group.children[i]
+			// 					child.scale.set(0.01,0.01,0.01);
+			// 					child.position.x = -0.25;
+			// 					markerRoot1.add(child)
+			//
+			//
+			// 				}
+			//
+			// 									console.log("group.children*************",group.children)
+			//
+			// 								console.log("markerRoot1*************",markerRoot1)
+			//
+			//
+			// 				//
+			// 				// for(let i=0;i<2;i++){
+			// 				// 	let child=group.children[i]
+			// 				// 	markerRoot1.add(child)
+			// 				//
+			// 				// }
+			// 				// markerRoot1.add(mesh0);
+			// 				// markerRoot1.add(mesh1);
+			// 				// markerRoot1.add(mesh2);
+			// 				// markerRoot1.add(mesh3);
+			// 				// markerRoot1.add(mesh4);
+			// 				// markerRoot1.add(mesh5);
+			// 				// markerRoot1.add(mesh6);
+			// 				// markerRoot1.add(mesh7);
+			// 				// markerRoot1.add(mesh8);
+			// 				// markerRoot1.add(mesh9);
+			// 				// markerRoot1.add(mesh10);
+			// 				// markerRoot1.add(mesh11);
+			// 				// markerRoot1.add(mesh12);
+			// 				// markerRoot1.add(mesh13);
+			// 				// markerRoot1.add(mesh14);
+			// 				// markerRoot1.add(group.children[0]);
+			// 				// markerRoot1.add(group.children[1]);
+			// 				// markerRoot1.add(group.children[2]);
+			// 				// markerRoot1.add(group.children[3]);
+			// 				// markerRoot1.add(group.children[4]);
+			// 				// markerRoot1.add(group.children[5]);
+			// 				// markerRoot1.add(group.children[6]);
+			// 				// markerRoot1.add(group.children[7]);
+			// 				// markerRoot1.add(group.children[8]);
+			// 				// markerRoot1.add(group.children[9]);
+			// 				// markerRoot1.add(group.children[10]);
+			// 				// markerRoot1.add(group.children[11]);
+			// 				// markerRoot1.add(group.children[12]);
+			// 				// markerRoot1.add(group.children[13]);
+			// 				// markerRoot1.add(group.children[14]);
+			//
+			// 			}, onProgress, onError )
+			// 	});
+			// 	new THREE.MTLLoader()
+			// 		.setPath( 'male02/' )
+			// 		.load( 'male02.mtl', function ( materials ) {
+			// 			materials.preload();
+			// 			new THREE.OBJLoader()
+			// 				.setMaterials( materials )
+			// 				.setPath( 'male02/' )
+			// 				.load( 'male02.obj', function ( group ) {
+			// 					console.log("@@@@@group.children",group.children);
+			// 					// mesh0.material.side = THREE.DoubleSide;
+			// 					// mesh0.position.y = -0.25;
+			// 					mesh0 = group.children[0];
+			// 					mesh0.scale.set(0.01,0.01,0.01);
+			//
+			// 					mesh1 = group.children[1];
+			// 					mesh1.scale.set(0.02,0.02,0.02);
+			// 					mesh1.material.side = THREE.DoubleSide;
+			//
+			// mesh1.position.z = 1;
+			// mesh1.position.y = -2;
+			// 					mesh2 = group.children[2];
+			// 					mesh2.scale.set(0.01,0.01,0.01);
+			//
+			// 					mesh3 = group.children[3];
+			// 					mesh3.scale.set(0.01,0.01,0.01);
+			// 					mesh4 = group.children[4];
+			// 					mesh4.scale.set(0.01,0.01,0.01);
+			// 					mesh5 = group.children[5];
+			// 					mesh5.scale.set(0.01,0.01,0.01);
+			// 					mesh6 = group.children[6];
+			// 					mesh6.scale.set(0.01,0.01,0.01);
+			// 					mesh7 = group.children[7];
+			// 					mesh7.scale.set(0.01,0.01,0.01);
+			// 					mesh8 = group.children[8];
+			// 					mesh8.scale.set(0.01,0.01,0.01);
+			// 					mesh9 = group.children[9];
+			// 					mesh9.scale.set(0.01,0.01,0.01);
+			// 					mesh10 = group.children[10];
+			// 					mesh10.scale.set(0.01,0.01,0.01);
+			// 					mesh11 = group.children[11];
+			// 					mesh11.scale.set(0.01,0.01,0.01);
+			// 					mesh12 = group.children[12];
+			// 					mesh12.scale.set(0.01,0.01,0.01);
+			// 					mesh13 = group.children[13];
+			// 					mesh13.scale.set(0.01,0.01,0.01);
+			//
+			//
+			// 					mesh0.position.x = 0.35
+			// 					// mesh1.position.x = 0.35
+			// 					mesh2.position.x = 0.35
+			// 					mesh3.position.x = 0.35
+			// 					mesh4.position.x = 0.35
+			// 					mesh5.position.x = 0.35
+			// 					mesh6.position.x = 0.35
+			// 					mesh7.position.x = 0.35
+			// 					mesh8.position.x = 0.35
+			// 					mesh9.position.x = 0.35
+			// 					mesh10.position.x = 0.35
+			// 					mesh11.position.x = 0.35
+			// 					mesh12.position.x = 0.35
+			// 					mesh13.position.x = 0.35
+			//
+			// 					// markerRoot1.add(mesh0);
+			// 					markerRoot1.add(mesh1);
+			// 					// markerRoot1.add(mesh2);
+			// 					// markerRoot1.add(mesh3);
+			// 					// markerRoot1.add(mesh4);
+			// 					// markerRoot1.add(mesh5);
+			// 					// markerRoot1.add(mesh6);
+			// 					// markerRoot1.add(mesh7);
+			// 					// markerRoot1.add(mesh8);
+			// 					// markerRoot1.add(mesh9);
+			// 					// markerRoot1.add(mesh10);
+			// 					// markerRoot1.add(mesh11);
+			// 					// markerRoot1.add(mesh12);
+			// 					// markerRoot1.add(mesh13);
+			//
+			// 				}, onProgress, onError )
+			// 		});
 
 
-				//
-				// for(let i=0;i<2;i++){
-				// 	let child=group.children[i]
-				// 	markerRoot1.add(child)
-				//
-				// }
-				// markerRoot1.add(mesh0);
-				// markerRoot1.add(mesh1);
-				// markerRoot1.add(mesh2);
-				// markerRoot1.add(mesh3);
-				// markerRoot1.add(mesh4);
-				// markerRoot1.add(mesh5);
-				// markerRoot1.add(mesh6);
-				// markerRoot1.add(mesh7);
-				// markerRoot1.add(mesh8);
-				// markerRoot1.add(mesh9);
-				// markerRoot1.add(mesh10);
-				// markerRoot1.add(mesh11);
-				// markerRoot1.add(mesh12);
-				// markerRoot1.add(mesh13);
-				// markerRoot1.add(mesh14);
-				// markerRoot1.add(group.children[0]);
-				// markerRoot1.add(group.children[1]);
-				// markerRoot1.add(group.children[2]);
-				// markerRoot1.add(group.children[3]);
-				// markerRoot1.add(group.children[4]);
-				// markerRoot1.add(group.children[5]);
-				// markerRoot1.add(group.children[6]);
-				// markerRoot1.add(group.children[7]);
-				// markerRoot1.add(group.children[8]);
-				// markerRoot1.add(group.children[9]);
-				// markerRoot1.add(group.children[10]);
-				// markerRoot1.add(group.children[11]);
-				// markerRoot1.add(group.children[12]);
-				// markerRoot1.add(group.children[13]);
-				// markerRoot1.add(group.children[14]);
-
-			}, onProgress, onError )
-	});
-
-}
+			new THREE.MTLLoader()
+				.setPath('skull/')
+				.load('12140_Skull_v3_L2.mtl', function(materials) {
+					materials.preload();
+					new THREE.OBJLoader()
+						.setMaterials(materials)
+						.setPath('skull/')
+						.load('12140_Skull_v3_L2.obj', function(group) {
 
 
-function update()
-{
-	// update artoolkit on every frame
-	if ( arToolkitSource.ready !== false )
-		arToolkitContext.update( arToolkitSource.domElement );
-}
+							for (let i = group.children.length - 1; i >= 0; i--) {
+								let child = group.children[i]
+								child.rotation.x = -Math.PI / 2;
+								child.scale.set(0.1, 0.1, 0.1);
+								child.position.x = -0.25;
+								child.position.y = 0.50;
+								markerRoot1.add(child)
 
 
-function render()
-{
-	renderer.render( scene, camera );
-}
+							}
+
+							console.log("group.childrenadsssssssssss*************", group.children)
+
+							console.log("markerRoot1*************", markerRoot1)
 
 
-function animate()
-{
-	requestAnimationFrame(animate);
-	deltaTime = clock.getDelta();
-	totalTime += deltaTime;
-	update();
-	render();
-}
 
-</script>
+						}, onProgress, onError)
+				});
+
+		}
+
+
+		function update() {
+			// update artoolkit on every frame
+			if (arToolkitSource.ready !== false)
+				arToolkitContext.update(arToolkitSource.domElement);
+		}
+
+
+		function render() {
+			renderer.render(scene, camera);
+		}
+
+
+		function animate() {
+			requestAnimationFrame(animate);
+			deltaTime = clock.getDelta();
+			totalTime += deltaTime;
+			update();
+			render();
+		}
+	</script>
 
 </body>
+
 </html>
