@@ -15,6 +15,9 @@
 	<script src="threex/threex-artoolkitcontext.js"></script>
 	<script src="threex/threex-arbasecontrols.js"></script>
 	<script src="threex/threex-armarkercontrols.js"></script>
+	<script src='js/stats.min.js'></script>
+	<script src="https://cdn.rawgit.com/mrdoob/three.js/r69/examples/js/loaders/ColladaLoader.js"></script>
+
 </head>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
@@ -25,7 +28,7 @@
 -->
 
 	<script>
-		var scene, camera, renderer, clock, deltaTime, totalTime;
+		var scene, camera, renderer, clock, deltaTime, totalTime, stats;
 
 		var arToolkitSource, arToolkitContext;
 
@@ -44,6 +47,9 @@
 
 			camera = new THREE.Camera();
 			scene.add(camera);
+
+			stats = new Stats();
+			document.body.appendChild(stats.dom);
 
 			renderer = new THREE.WebGLRenderer({
 				antialias: true,
@@ -122,8 +128,21 @@
 			});
 			mesh1 = new THREE.Mesh(geometry1, material1);
 			mesh1.rotation.x = -Math.PI / 2;
+			markerRoot1.castShadow =true
+			markerRoot1.receiveShadow =true
+			markerRoot1.add(mesh1);
 			markerRoot1.add(mesh1);
 
+
+
+
+
+
+
+
+
+			// let helper = new THREE.CameraHelper( light.shadow.camera );
+			// sceneGroup.add( helper );
 			function onProgress(xhr) {
 				console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 			}
@@ -337,24 +356,49 @@
 			// 		});
 
 
+			let floorGeometry = new THREE.PlaneGeometry(100, 100);
+			let floorMaterial = new THREE.ShadowMaterial();
+			floorMaterial.opacity = 0.8;
+			let floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+			floorMesh.rotation.x = -Math.PI / 2;
+			floorMesh.receiveShadow = true;
+			markerRoot1.add(floorMesh);
+
+
+			let light = new THREE.PointLight(0xF0FFFF, 1, 50);
+			light.position.set(2, 4, 2); // default; light shining from top
+			light.castShadow = true;
+			markerRoot1.add(light);
+
+			let lightSphere = new THREE.Mesh(
+				new THREE.SphereGeometry(0.1),
+				new THREE.MeshBasicMaterial({
+					color: 0xF0FFFF,
+					transparent: true,
+					opacity: 0.8
+				})
+			);
+			lightSphere.position.copy(light.position);
+			markerRoot1.add(lightSphere);
 			new THREE.MTLLoader()
-				.setPath('skull/')
-				.load('12140_Skull_v3_L2.mtl', function(materials) {
+				.setPath('cake/')
+				.load('Chocolate Cake.mtl', function(materials) {
 					materials.preload();
 					new THREE.OBJLoader()
 						.setMaterials(materials)
-						.setPath('skull/')
-						.load('12140_Skull_v3_L2.obj', function(group) {
-
+						.setPath('cake/')
+						.load('Chocolate Cake.obj', function(group) {
+							group.castShadow = true;
+							group.receiveShadow = true;
 							for (let i = group.children.length - 1; i >= 0; i--) {
 								let child = group.children[i]
-								child.rotation.x = -Math.PI / 2;
-								child.scale.set(0.1, 0.1, 0.1);
+								// child.rotation.x = -Math.PI / 2;
+								child.scale.set(0.09, 0.09, 0.09);
 								child.position.x = -0.25;
-								child.position.y = 0.50;
+								// child.position.y = -0.50;
+								child.castShadow = true;
+								child.receiveShadow = true;
 								markerRoot1.add(child)
-
-
 							}
 
 							console.log("group.childrenadsssssssssss*************", group.children)
@@ -370,6 +414,7 @@
 
 
 		function update() {
+			stats.update();
 			// update artoolkit on every frame
 			if (arToolkitSource.ready !== false)
 				arToolkitContext.update(arToolkitSource.domElement);
